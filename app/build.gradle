@@ -35,4 +35,8 @@ dependencies {
     implementation 'net.danlew:android.joda:2.9.9.3'
     api 'com.squareup.picasso:picasso:2.71828'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.firebase:firebase-core:17.0.1'
+    implementation 'com.google.firebase:firebase-database:18.0.1'
 }
+apply plugin: 'com.google.gms.google-services'

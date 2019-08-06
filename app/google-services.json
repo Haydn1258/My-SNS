@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1047695804297",
+    "firebase_url": "https://mysns-bb195.firebaseio.com",
+    "project_id": "mysns-bb195",
+    "storage_bucket": "mysns-bb195.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047695804297:android:22dcc922e04a84fd",
+        "android_client_info": {
+          "package_name": "com.example.mysns"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1047695804297-vlvstnf67dnvt7j33k60nnd1k1kqiblu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_DI6TDFdHU_Z4kdncqPGoscJgOlwg5_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1047695804297-vlvstnf67dnvt7j33k60nnd1k1kqiblu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
