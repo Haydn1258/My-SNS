@@ -1,7 +1,7 @@
 package com.example.mysns
 
 class Post{
-    var postID =""
+    var postId:String?=""
     var writerId = ""
     var message = ""
     var writeTime:Any = Any()
