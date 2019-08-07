@@ -5,14 +5,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
+import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_write.*
 import kotlinx.android.synthetic.main.card_background.view.*
@@ -22,6 +22,8 @@ class WriteActivity : AppCompatActivity() {
     var mode = "post"
     var postId =""
     var currentBgPosition = 0
+    private lateinit var database: DatabaseReference
+
 
     val bgList = mutableListOf(
         "android.resource://com.example.mysns/drawable/default_bg"
@@ -70,8 +72,25 @@ class WriteActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, "공유되었습니다.", Toast.LENGTH_SHORT).show()
                 finish()
             }else{
+                var commentCount = 0
                 val comment = Comment()
                 val newRef = FirebaseDatabase.getInstance().getReference("Comments/$postId").push()
+                val newRefPost =  FirebaseDatabase.getInstance().getReference("Posts/$postId/commentCount")
+                database = FirebaseDatabase.getInstance().reference
+
+                newRefPost.addListenerForSingleValueEvent(object: ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) {
+                        error.toException().printStackTrace()
+                    }
+
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        commentCount = snapshot.value.toString().toInt()+1
+                        val childUpdates = HashMap<String, Any>()
+                        childUpdates["/Posts/$postId/commentCount"] = commentCount.toString()
+                        database.updateChildren(childUpdates)
+                    }
+                })
+
                 comment.writeTime = ServerValue.TIMESTAMP
                 comment.bgUri = bgList[currentBgPosition]
                 comment.message = input.text.toString()
@@ -79,6 +98,8 @@ class WriteActivity : AppCompatActivity() {
                 comment.commnetId = newRef.key
                 comment.postId = postId
                 newRef.setValue(comment)
+
+
                 Toast.makeText(applicationContext, "공유되었습니다.", Toast.LENGTH_SHORT).show()
                 finish()
             }

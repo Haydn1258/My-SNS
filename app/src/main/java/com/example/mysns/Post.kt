@@ -6,5 +6,5 @@ class Post{
     var message = ""
     var writeTime:Any = Any()
     var bgUri = ""
-    var commentCount = 0
+    var commentCount = "0"
 }

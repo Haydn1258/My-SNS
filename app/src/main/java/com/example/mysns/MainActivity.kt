@@ -46,19 +46,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-     /*   ref.addValueEventListener(object:ValueEventListener{
-            override fun onCancelled(error: DatabaseError) {
-                error.toException().printStackTrace()
-            }
 
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val message = snapshot.value.toString()
-
-                Log.d(TAG, message)
-
-                supportActionBar?.title = message
-            }
-        })*/
 
         val layoutMangager = LinearLayoutManager(this@MainActivity)
 
@@ -152,7 +140,7 @@ class MainActivity : AppCompatActivity() {
             Picasso.get().load(Uri.parse(post.bgUri)).fit().centerCrop().into(holder.imageView)
             holder.contentsText.text = post.message
             holder.timeTextView.text = getDiffTimeText(post.writeTime as Long)
-            holder.commentCountText.text = "0"
+            holder.commentCountText.text = post.commentCount.toString()
 
             holder.itemView.setOnClickListener {
                 val intent = Intent(this@MainActivity, DetailActivity::class.java)
