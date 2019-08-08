@@ -1,7 +1,7 @@
 package com.example.mysns
 
 class Comment{
-    var commnetId:String? =""
+    var commentId:String? =""
     var postId= ""
     var writerId = ""
     var message = ""

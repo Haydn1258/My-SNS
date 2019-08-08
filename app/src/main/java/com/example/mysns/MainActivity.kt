@@ -145,6 +145,7 @@ class MainActivity : AppCompatActivity() {
             holder.itemView.setOnClickListener {
                 val intent = Intent(this@MainActivity, DetailActivity::class.java)
                 intent.putExtra("postId", post.postId)
+                intent.putExtra("writeId", post.writerId)
 
                 startActivity(intent)
             }

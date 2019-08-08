@@ -21,6 +21,7 @@ class WriteActivity : AppCompatActivity() {
 
     var mode = "post"
     var postId =""
+    var commentId=""
     var currentBgPosition = 0
     private lateinit var database: DatabaseReference
 
@@ -46,14 +47,49 @@ class WriteActivity : AppCompatActivity() {
             postId = intent.getStringExtra("postId")
         }
 
-        supportActionBar?.title = if(mode.equals("post")) "글쓰기" else "댓글쓰기"
+       // if(mode.equals("post")) "글쓰기" else if(mode.equals("comment"))"댓글쓰기"
+        when{
+            mode.equals("post") -> supportActionBar?.title ="글쓰기"
+            mode.equals("comment") -> supportActionBar?.title ="댓글쓰기"
+            mode.equals("commentEdit") -> {
+                commentId = intent.getStringExtra("commentId")
+                supportActionBar?.title = "댓글수정"
+                val refCommentEdit =  FirebaseDatabase.getInstance().getReference("Comments/$postId/$commentId/message")
+                refCommentEdit.addListenerForSingleValueEvent(object: ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) {
+                        error.toException().printStackTrace()
+                    }
+
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        input.setText(snapshot.value.toString())
+                    }
+                })
+
+            }
+            else -> {
+                supportActionBar?.title ="글수정"
+                val refPostEdit =  FirebaseDatabase.getInstance().getReference("Posts/$postId/message")
+                refPostEdit.addListenerForSingleValueEvent(object: ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) {
+                        error.toException().printStackTrace()
+                    }
+
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        input.setText(snapshot.value.toString())
+                    }
+                })
+            }
+        }
+
+
+
 
         val layoutManager = LinearLayoutManager(this@WriteActivity)
         layoutManager.orientation = LinearLayoutManager.HORIZONTAL
 
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = MyAdapter()
-
+        database = FirebaseDatabase.getInstance().reference
         sendButton.setOnClickListener {
             if(TextUtils.isEmpty(input.text)){
                 Toast.makeText(applicationContext, "메세지를 입력하세요", Toast.LENGTH_LONG).show()
@@ -71,12 +107,12 @@ class WriteActivity : AppCompatActivity() {
                 newRef.setValue(post)
                 Toast.makeText(applicationContext, "공유되었습니다.", Toast.LENGTH_SHORT).show()
                 finish()
-            }else{
+            }else if(mode.equals("comment")){
                 var commentCount = 0
                 val comment = Comment()
                 val newRef = FirebaseDatabase.getInstance().getReference("Comments/$postId").push()
                 val newRefPost =  FirebaseDatabase.getInstance().getReference("Posts/$postId/commentCount")
-                database = FirebaseDatabase.getInstance().reference
+
 
                 newRefPost.addListenerForSingleValueEvent(object: ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
@@ -95,12 +131,23 @@ class WriteActivity : AppCompatActivity() {
                 comment.bgUri = bgList[currentBgPosition]
                 comment.message = input.text.toString()
                 comment.writerId = getMyId()
-                comment.commnetId = newRef.key
+                comment.commentId = newRef.key
                 comment.postId = postId
                 newRef.setValue(comment)
 
 
                 Toast.makeText(applicationContext, "공유되었습니다.", Toast.LENGTH_SHORT).show()
+                finish()
+            } else if(mode.equals("commentEdit")){
+                val postEditUpdate = HashMap<String, Any>()
+                postEditUpdate["/Comments/$postId/$commentId/message"] = input.text.toString()
+                database.updateChildren(postEditUpdate)
+                finish()
+            }
+            else{
+                val postEditUpdate = HashMap<String, Any>()
+                postEditUpdate["/Posts/$postId/message"] = input.text.toString()
+                database.updateChildren(postEditUpdate)
                 finish()
             }
 
