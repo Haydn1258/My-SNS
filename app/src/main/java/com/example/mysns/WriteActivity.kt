@@ -1,5 +1,7 @@
 package com.example.mysns
 
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -43,6 +45,7 @@ class WriteActivity : AppCompatActivity() {
         setContentView(R.layout.activity_write)
         (deleteButton as View).visibility =View.GONE
 
+
         intent.getStringExtra("mode")?.let{
             mode = intent.getStringExtra("mode")
             postId = intent.getStringExtra("postId")
@@ -56,32 +59,13 @@ class WriteActivity : AppCompatActivity() {
                 commentId = intent.getStringExtra("commentId")
                 supportActionBar?.title = "댓글수정"
                 (deleteButton as View).visibility =View.VISIBLE
-
-                val refCommentEdit =  FirebaseDatabase.getInstance().getReference("Comments/$postId/$commentId/message")
-                refCommentEdit.addListenerForSingleValueEvent(object: ValueEventListener {
-                    override fun onCancelled(error: DatabaseError) {
-                        error.toException().printStackTrace()
-                    }
-
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        input.setText(snapshot.value.toString())
-                    }
-                })
+                inputTextUpdate("Comments/$postId/$commentId/message")
 
             }
             else -> {
                 supportActionBar?.title ="글수정"
                 (deleteButton as View).visibility =View.VISIBLE
-                val refPostEdit =  FirebaseDatabase.getInstance().getReference("Posts/$postId/message")
-                refPostEdit.addListenerForSingleValueEvent(object: ValueEventListener {
-                    override fun onCancelled(error: DatabaseError) {
-                        error.toException().printStackTrace()
-                    }
-
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        input.setText(snapshot.value.toString())
-                    }
-                })
+                inputTextUpdate("Posts/$postId/message")
             }
         }
         val layoutManager = LinearLayoutManager(this@WriteActivity)
@@ -150,7 +134,11 @@ class WriteActivity : AppCompatActivity() {
             }else if(mode.equals("postEdit")){
                 FirebaseDatabase.getInstance().getReference("Posts/$postId").removeValue()
                 FirebaseDatabase.getInstance().getReference("Comments/$postId").removeValue()
+                val intent = Intent(applicationContext, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
                 finish()
+
             }
         }
 
@@ -203,6 +191,20 @@ class WriteActivity : AppCompatActivity() {
                 val childUpdates = HashMap<String, Any>()
                 childUpdates["/Posts/$postId/commentCount"] = commentCount.toString()
                 database.updateChildren(childUpdates)
+            }
+        })
+    }
+
+    fun inputTextUpdate(referenceValue:String){
+        val refEdit =  FirebaseDatabase.getInstance().getReference(referenceValue)
+
+        refEdit.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+                error.toException().printStackTrace()
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                input.setText(snapshot.value.toString())
             }
         })
     }
