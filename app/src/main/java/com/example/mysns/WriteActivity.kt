@@ -41,6 +41,7 @@ class WriteActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_write)
+        (deleteButton as View).visibility =View.GONE
 
         intent.getStringExtra("mode")?.let{
             mode = intent.getStringExtra("mode")
@@ -54,6 +55,8 @@ class WriteActivity : AppCompatActivity() {
             mode.equals("commentEdit") -> {
                 commentId = intent.getStringExtra("commentId")
                 supportActionBar?.title = "댓글수정"
+                (deleteButton as View).visibility =View.VISIBLE
+
                 val refCommentEdit =  FirebaseDatabase.getInstance().getReference("Comments/$postId/$commentId/message")
                 refCommentEdit.addListenerForSingleValueEvent(object: ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
@@ -68,6 +71,7 @@ class WriteActivity : AppCompatActivity() {
             }
             else -> {
                 supportActionBar?.title ="글수정"
+                (deleteButton as View).visibility =View.VISIBLE
                 val refPostEdit =  FirebaseDatabase.getInstance().getReference("Posts/$postId/message")
                 refPostEdit.addListenerForSingleValueEvent(object: ValueEventListener {
                     override fun onCancelled(error: DatabaseError) {
@@ -80,16 +84,14 @@ class WriteActivity : AppCompatActivity() {
                 })
             }
         }
-
-
-
-
         val layoutManager = LinearLayoutManager(this@WriteActivity)
         layoutManager.orientation = LinearLayoutManager.HORIZONTAL
 
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = MyAdapter()
         database = FirebaseDatabase.getInstance().reference
+
+
         sendButton.setOnClickListener {
             if(TextUtils.isEmpty(input.text)){
                 Toast.makeText(applicationContext, "메세지를 입력하세요", Toast.LENGTH_LONG).show()
@@ -108,24 +110,10 @@ class WriteActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, "공유되었습니다.", Toast.LENGTH_SHORT).show()
                 finish()
             }else if(mode.equals("comment")){
-                var commentCount = 0
                 val comment = Comment()
+                commentCountUpdate("send")
                 val newRef = FirebaseDatabase.getInstance().getReference("Comments/$postId").push()
-                val newRefPost =  FirebaseDatabase.getInstance().getReference("Posts/$postId/commentCount")
 
-
-                newRefPost.addListenerForSingleValueEvent(object: ValueEventListener {
-                    override fun onCancelled(error: DatabaseError) {
-                        error.toException().printStackTrace()
-                    }
-
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        commentCount = snapshot.value.toString().toInt()+1
-                        val childUpdates = HashMap<String, Any>()
-                        childUpdates["/Posts/$postId/commentCount"] = commentCount.toString()
-                        database.updateChildren(childUpdates)
-                    }
-                })
 
                 comment.writeTime = ServerValue.TIMESTAMP
                 comment.bgUri = bgList[currentBgPosition]
@@ -151,6 +139,19 @@ class WriteActivity : AppCompatActivity() {
                 finish()
             }
 
+        }
+
+        deleteButton.setOnClickListener {
+            if(mode.equals("commentEdit")){
+                FirebaseDatabase.getInstance().getReference("Comments/$postId/$commentId").removeValue()
+                commentCountUpdate("delete")
+                finish()
+
+            }else if(mode.equals("postEdit")){
+                FirebaseDatabase.getInstance().getReference("Posts/$postId").removeValue()
+                FirebaseDatabase.getInstance().getReference("Comments/$postId").removeValue()
+                finish()
+            }
         }
 
     }
@@ -181,5 +182,28 @@ class WriteActivity : AppCompatActivity() {
                 Picasso.get().load(Uri.parse(bgList[position])).fit().centerCrop().into(writeBackground)
             }
         }
+    }
+    fun commentCountUpdate(mode:String){
+        var commentCount = 0
+        val newRefPost =  FirebaseDatabase.getInstance().getReference("Posts/$postId/commentCount")
+
+
+        newRefPost.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+                error.toException().printStackTrace()
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(mode.equals("send")){
+                    commentCount = snapshot.value.toString().toInt()+1
+                }
+                else{
+                    commentCount = snapshot.value.toString().toInt()-1
+                }
+                val childUpdates = HashMap<String, Any>()
+                childUpdates["/Posts/$postId/commentCount"] = commentCount.toString()
+                database.updateChildren(childUpdates)
+            }
+        })
     }
 }
