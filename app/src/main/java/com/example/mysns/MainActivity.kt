@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.recyclerView
+import kotlinx.android.synthetic.main.  activity_main.recyclerView
 import kotlinx.android.synthetic.main.activity_write.*
 import kotlinx.android.synthetic.main.card_background.view.*
 import kotlinx.android.synthetic.main.card_background.view.imageView
